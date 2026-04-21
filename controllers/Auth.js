@@ -26,14 +26,14 @@ exports.sendOtp = async (req, res) => {
     } 
     
     //generate a 6 digit random otp
-    var otp = otpGenerator.generate(6, {
+    let otp = otpGenerator.generate(6, {
         upperCaseAlphabets: false, 
         specialChars: false, 
         lowerCaseAlphabets: false
     });
 
     //check unique otp or not
-    const result = await otp.findOne({otp: otp});
+    const result = await OTP.findOne({otp});
 
     while(result){
         otp = otpGenerator.generate(6, {
@@ -41,13 +41,13 @@ exports.sendOtp = async (req, res) => {
             specialChars: false, 
             lowerCaseAlphabets: false
         });
-        const result = await otp.findOne({otp: otp});
+        const result = await OTP.findOne({otp});
     }
 
     const otpPayload = {email, otp};
 
     //create an entry in db for otp
-    const otpBody = await otp.create(otpPayload);
+    const otpBody = await OTP.create(otpPayload);
     console.log(otpBody);
 
     //return response successful
@@ -77,12 +77,13 @@ exports.signup = async(req,res)=>{
             email,
             password,
             confirmPassword,
+            contactNumber,
             accountType,
             otp
         } = req.body;
 
         //validation of data
-        if(!firstName || !lastName || !email || !password || !confirmPassword || !accountType || !otp){
+        if(!firstName || !lastName || !email || !password || !contactNumber || !confirmPassword || !accountType || !otp){
             return res.status(403).json({
                 success: false,
                 message: "All fields are required",
@@ -140,6 +141,7 @@ exports.signup = async(req,res)=>{
             email,
             contactNumber,
             password: hashedPassword,
+            contactNumber,
             accountType,
             additionalDetails: profileDetails._id,
             image: `https://api.dicebear.com/5.x/initials/svg?seed=${firstName} ${lastName}`,
@@ -224,3 +226,26 @@ exports.login = async (req, res) => {
     }};
 
 //Change password controller
+exports.changePassword = async (req, res) => {
+    try {
+        const { oldPassword, newPassword, confirmPassword } = req.body;
+        const userId = req.user.id;
+
+        if (newPassword !== confirmPassword) {
+            return res.status(400).json({ success: false, message: "Passwords do not match" });
+        }
+
+        const user = await User.findById(userId);
+        const isMatch = await bcrypt.compare(oldPassword, user.password);
+        if (!isMatch) {
+            return res.status(401).json({ success: false, message: "Old password is incorrect" });
+        }
+
+        user.password = await bcrypt.hash(newPassword, 10);
+        await user.save();
+
+        return res.status(200).json({ success: true, message: "Password changed successfully" });
+    } catch (error) {
+        return res.status(500).json({ success: false, message: error.message });
+    }
+};

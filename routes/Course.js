@@ -34,20 +34,6 @@ const{
 //Importing middlewares
 const{auth,isInstructor,isStudent,isAdmin} = require("../middlewares/auth");
 
-console.log({
-  createCourse,
-  showAllCourses,
-  getCourseDetails,
-  createSection,
-  updateSection,
-  deleteSection,
-  createCategory,
-  showAllCategories,
-  categoryPageDetails,
-  createRating,
-  getAverageRating,
-  getAllRating
-});
 
 //routes
 //Course

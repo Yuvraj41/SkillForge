@@ -1,5 +1,5 @@
 const Course = require('../models/Course');
-const Tag = require('../models/Tag');
+const Category = require("../models/Category")
 const User = require('../models/User');
 const { uploadImageToCloudinary } = require('../utils/imageUpload');
 
@@ -7,13 +7,13 @@ const { uploadImageToCloudinary } = require('../utils/imageUpload');
 exports.createCourse = async(req,res)=>{
     try {
         //fetch data from request body
-        const {courseName,courseDescription,whatYouWillLearn,price,tag} = req.body;
+        const {courseName,courseDescription,whatYouWillLearn,price,tag,category,instructions,status} = req.body;
 
         //get thumbnail
         const thumbnail = req.files.thumbnailImage;
 
         //validation
-        if(!courseName || !courseDescription || !whatYouWillLearn || !price || !tag || !thumbnail){
+        if(!courseName || !courseDescription || !whatYouWillLearn || !price || !tag || !thumbnail || !category){
             return res.status(400).json({
                 success:false,
                 message:"All fields are required",
@@ -35,8 +35,8 @@ exports.createCourse = async(req,res)=>{
         }
 
         //check for tag validity
-        const tagDetails = await Tag.findById(tag);
-        if(!tagDetails){
+        const categoryDetails = await Category.findById(tag);
+        if(!categoryDetails){
             return res.status(400).json({
                 success:false,
                 message:"Tag not found",
@@ -55,6 +55,9 @@ exports.createCourse = async(req,res)=>{
             price,
             tag:tagDetails._id,
             thumbnailImage:thumbnailImage.secure_url,
+            category: categoryDetails._id,
+            instructions,
+            status: status || "Draft",
         })
 
         //add the new course to the user schema of Instructor
@@ -69,8 +72,8 @@ exports.createCourse = async(req,res)=>{
         )
         
         //update the tag schema 
-        await Tag.findByIdAndUpdate(
-            {_id: tagDetails._id},
+        await  Category.findByIdAndUpdate(
+            {_id: categoryDetails._id},
             {
                 $push:{
                     courses: newCourse._id,
@@ -106,6 +109,7 @@ exports.showAllCourses = async(req,res)=>{
             studentsEnrolled:true,
             tag:true,
         }).populate("instructor").exec();
+
         return res.status(200).json({
             success:true,
             message:"All courses fetched successfully",
@@ -128,7 +132,7 @@ exports.getCourseDetails = async(req,res)=>{
         const {courseId} = req.body;
 
         //find course details
-        const courseDetails = await Course.find(
+        const courseDetails = await Course.findById(
             {_id:courseId}
             .populate({
             path:instructor,

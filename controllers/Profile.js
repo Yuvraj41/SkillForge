@@ -4,7 +4,7 @@ const User = require("../models/User");
 exports.updateProfile = async(req,res)=>{
     try {
         //get data
-        const {dateOfBirth="", about="", contactNumber, gender} = req.bosy;
+        const {dateOfBirth="", about="", contactNumber, gender} = req.body;
         //get user id
         const id = req.user.id;
 

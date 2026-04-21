@@ -1,4 +1,4 @@
-const Category = require('../models/categorySchema');
+const Category = require('../models/Category');
 
 //create tag handler function
 exports.createCategory = async (req, res) => {
@@ -60,8 +60,8 @@ exports.categoryPageDetails = async(req,res)=>{
         //get CategoryId
         const {categoryId} = req.body;
         //get courses for specified categoryId
-        const selectedCategory = await categoryId.findById(categoryId)
-        .populate("courses")
+        const selectedCategory = await Category.findById(categoryId)
+        .populate("course")
         .exec();
 
         //validation
