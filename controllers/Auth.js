@@ -101,7 +101,7 @@ exports.signup = async(req,res)=>{
         //check if user already exists or not
         const existingUser = await User.findOne({email});
         if(existingUser){
-            return res.status(40).json({
+            return res.status(400).json({
                 success: false,
                 message: "User already exists, please login",
             });
@@ -112,7 +112,7 @@ exports.signup = async(req,res)=>{
         console.log(recentOtp);
        
         //validate otp
-        if(recentOtp.length == 0){
+        if(!recentOtp){
             return res.status(400).json({
                 success: false,
                 message: "OTP not found, please request for a new OTP",
@@ -135,13 +135,12 @@ exports.signup = async(req,res)=>{
             contactNumber:null,
         }); 
   
-        const uder = await User.create({
+        const user = await User.create({
             firstName,
             lastName,
             email,
             contactNumber,
             password: hashedPassword,
-            contactNumber,
             accountType,
             additionalDetails: profileDetails._id,
             image: `https://api.dicebear.com/5.x/initials/svg?seed=${firstName} ${lastName}`,
@@ -151,7 +150,7 @@ exports.signup = async(req,res)=>{
         return res.status(200).json({
             success: true,
             message: "User registered successfully",
-            User,
+            user,
         });
 
     } catch (error) {

@@ -11,9 +11,9 @@ const{
 
 
 //routes
-router.delete("/deleteProfile",deleteAccount)
+router.delete("/deleteProfile",auth,deleteAccount)
 router.put("/updateProfile",auth,updateProfile)
-router.get("/getUserDetils",auth,getUserDetails)
+router.get("/getUserDetails",auth,getUserDetails)
 //router.get("/getEnrolledCourses",auth,getEnrolledCourses)
 //router.put("/updateDisplayPicture",auth,updateDisplayPicture)
 
